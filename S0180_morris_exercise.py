@@ -31,6 +31,8 @@ Når dit program er færdigt, skal du skubbe det til dit github-repository.
 Send derefter denne Teams-meddelelse til din lærer: <filename> færdig
 Fortsæt derefter med den næste fil.
 """
+from operator import truediv
+
 morris = {"turn": 0, "sleepiness": 0, "thirst": 0, "hunger": 0, "whisky": 0, "gold": 0}
 
 def sleep():
@@ -85,3 +87,6 @@ while not is_dead() and morris["turn"] < 1000:
     else:
         mine()
     print(morris)
+
+if is_dead() == True:
+    print("Morris is dead")
