@@ -39,11 +39,11 @@ Send derefter denne Teams-besked til din lærer: <filename> færdig
 Fortsæt derefter med den næste fil."""
 
 class Character():
-    def __init__(self, name, _current_health=100, max_health=100, attackpower=10,):
+    def __init__(self, name, max_health=100, attackpower=10,):
         self.name = name
         self.max_health = max_health
         self.attackpower = attackpower
-        self._current_health = _current_health
+        self._current_health = max_health
 
     def __repr__(self):
         return f"Character Name: {self.name} Class: (Insert Class here), Stats: {self.attackpower} ATK {self.max_health} HP"
@@ -64,16 +64,18 @@ class Character():
 
 
 class Healer(Character):
-    def __init__(self, attackpower=0, healpower=10):
+    def __init__(self, name, max_health, healpower=10):
+        super().__init__(name, max_health, 0 )
         self.healpower = healpower
+
 
     def heal(self, other):
         other.get_healed(self.healpower)
 
 
-Warrior1 = Character("Warrior1")
-Warrior2 = Character("Warrior2")
-Healer = Healer("Healer")
+Warrior1 = Character("Warrior1", 100, 10)
+Warrior2 = Character("Warrior2", 100, 10)
+Healer = Healer("Healer", 100, 10)
 Warrior1.hit(Warrior2)
 print(Warrior2._current_health)
 Healer.heal(Warrior2)
