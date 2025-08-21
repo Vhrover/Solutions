@@ -48,6 +48,9 @@ class Character():
         return f"Character Name: {self.name} Class: (Insert Class here), Stats: {self.attackpower} ATK {self.max_health} HP Current HP: {self._current_health}"
 
 
+    def current_health(self):
+        return self._current_health
+
     def hit(self, other):
         other.get_hit(self.attackpower)
 
@@ -55,6 +58,9 @@ class Character():
     def get_hit(self, damage_amount, iscrit):
         if self._current_health > 0:
             self._current_health -= damage_amount
+
+    def full_health(self):
+        self._current_health = self.max_health
 
 
     def get_healed(self, heal_amount):
@@ -68,6 +74,7 @@ class Character():
             self.dot_damage = damage
 
     def remove_dot(self):
+        self.dot_time = 0
         if self.current_afflictions:
             del self.current_afflictions[0]
 
@@ -76,14 +83,14 @@ class Character():
 
             self.dot_proc(self.dot_damage)
 
-            print(f"{self.name}'s {self.current_afflictions[0]} damaged {self.dot_damage}")
+            # print(f"{self.name}'s {self.current_afflictions[0]} damaged {self.dot_damage}")
 
             if self.dot_time == 1:
                 self.remove_dot()
 
             self.dot_time -= 1
 
-            print(self.current_afflictions)
+            # print(self.current_afflictions)
 
     def dot_proc(self, damage):
         self.get_hit(damage, False)
@@ -92,10 +99,14 @@ class Character():
         turns = 0
         fighter1 = self
         fighter2 = other
-        while self._current_health > 0 and other._current_health > 0:
+        while self.current_health() > 0 and other.current_health() > 0:
             turns += 1
             fighter1.dot_checker()
+            if fighter2.current_health() < 1 or fighter1.current_health() < 1:
+                return fighter1.winchecker(fighter2)
             fighter2.dot_checker()
+            # fighter1.dot_checker()
+            # fighter2.dot_checker()
             # if self.dot_time > 0:
             #
             #     self.dot_proc(self.dot_damage)
@@ -135,16 +146,27 @@ class Character():
             # fighter1.fireball(fighter2)
             # fighter2.bleed_test(fighter1)
             fighter1.use_ability(fighter2)
+            if fighter2.current_health() < 1 or fighter1.current_health() < 1:
+                return fighter1.winchecker(fighter2)
             fighter2.use_ability(fighter1)
-            print(f"Turn: {turns} {fighter1.name} {fighter1._current_health}/{fighter1.max_health} {fighter2.name} {fighter2._current_health}/{fighter2.max_health}")
+
+            # print(f"Turn: {turns} {fighter1.name} {fighter1._current_health}/{fighter1.max_health} {fighter2.name} {fighter2._current_health}/{fighter2.max_health}")
 
         fighter1.remove_dot()
         fighter2.remove_dot()
+
+        return fighter1.winchecker(fighter2)
 
         # if self.current_afflictions:
         #     del self.current_afflictions[0]
         # elif other.current_afflictions:
         #     del other.current_afflictions[0]
+
+    def winchecker(self, other):
+        if self.current_health() > 0 and other.current_health() <= 0:
+            return self
+        elif other.current_health() > 0 and self.current_health() <= 0:
+            return other
 
 
 class Healer(Character):
@@ -167,19 +189,21 @@ class Mage(Character):
         potency = 1.5
         accuracy = 80
         accuracy_roll = random.randint(1, 100)
+        dot_roll = random.randint(1, 100)
         self.mana -= 10
-        if accuracy_roll >= accuracy:
-            print("Miss!")
-        else:
+        if accuracy_roll > accuracy:
+            # print("Miss!")
+            return
+        elif dot_roll >= 20:
+            other.get_dot(self, 2, 15, "Burn")
+        elif accuracy_roll <= accuracy:
             other.get_hit(self.magicpower * potency, False)
-            other.get_dot(self, 2, 5, "Burn")
-
     def use_ability(self, other):
         random_number = random.randint(0, len(self.abilitylist)-1)
         self.abilitylist[random_number](other)
 
 class Rogue(Character):
-    def __init__(self, name, max_health, crit_chance=15, crit_bonus=2):
+    def __init__(self, name, max_health, crit_chance=25, crit_bonus=4):
         super().__init__(name, max_health, 8)
         self.crit_chance = crit_chance
         self.crit_bonus = crit_bonus
@@ -190,7 +214,7 @@ class Rogue(Character):
         if crit_roll <= self.crit_chance:
             iscrit = True
             other.get_hit(self.attackpower * self.crit_bonus, iscrit)
-            print("Critical Hit!")
+            # print("Critical Hit!")
         else:
             iscrit = False
             other.get_hit(self.attackpower, iscrit)
@@ -199,10 +223,31 @@ class Rogue(Character):
         other.get_dot(self, 3, 10, "Bleed")
 
     def use_ability(self, other):
-        random_number = random.randint(0, len(self.abilitylist)-1)
-        self.abilitylist[random_number](other)
+        # random_number = random.randint(0, len(self.abilitylist)-1)
+        # self.abilitylist[random_number](other)
+        if not other.current_afflictions:
+            self.bleed_test(other)
+        else:
+            random_number = random.randint(0, len(self.abilitylist)-1)
+            self.abilitylist[random_number](other)
 
-
+def simulate_fights(fighter1, fighter2, rounds):
+    fighter1_wins = 0
+    fighter2_wins = 0
+    for x in range(rounds):
+        fighter1.full_health()
+        fighter2.full_health()
+        fighter1.enter_combat(fighter2)
+        print(f"[{fighter1.winchecker(fighter2)}")
+        # if fighter1.winchecker(fighter1) == fighter1:
+        #     fighter1_wins += 1
+        # elif fighter1.winchecker(fighter2) == fighter2:
+        #     fighter2_wins += 1
+        if fighter1.enter_combat(fighter2) == fighter1:
+            fighter1_wins += 1
+        elif fighter1.enter_combat(fighter2) == fighter2:
+            fighter2_wins += 1
+    print(f"{fighter1.name} won {fighter1_wins}/{rounds}, {fighter2.name} won {fighter2_wins}/{rounds}")
 
 # def fight(fighter1, fighter2):
 #     turn = 0
@@ -216,9 +261,10 @@ class Rogue(Character):
 harris = Mage("Harris", 100)
 morris = Rogue("Morris", 100)
 
-harris.enter_combat(morris)
-print(harris.current_afflictions, "after combat test")
-print(morris.current_afflictions, "after combat test")
+simulate_fights(harris, morris, 100)
+# harris.enter_combat(morris)
+# print(harris.current_afflictions, "after combat test")
+# print(morris.current_afflictions, "after combat test")
 # fight(harris, morris)
 
 # def game_over(isover):
