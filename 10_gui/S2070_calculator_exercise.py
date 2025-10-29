@@ -18,25 +18,31 @@ def calculate():
     global other_number
     global operator
 
-    if operator == '+':
-        temp_number = float(current_number) + float(other_number)
-        clear()
-        current_number = str(temp_number)
-        update_entry()
-    elif operator == '-':
-        temp_number = float(current_number) - float(other_number)
-        clear()
-        current_number = str(temp_number)
-        update_entry()
-    elif operator == '*':
-        temp_number = float(current_number) * float(other_number)
-        clear()
-        current_number = str(temp_number)
-        update_entry()
-    elif operator == '/':
-        temp_number = float(current_number) / float(other_number)
-        current_number = str(temp_number)
-        update_entry()
+    tempnum = eval(current_number + operator + other_number)
+    clear()
+    current_number = str(tempnum)
+    update_entry()
+
+
+    # if operator == '+':
+    #     temp_number = float(current_number) + float(other_number)
+    #     clear()
+    #     current_number = str(temp_number)
+    #     update_entry()
+    # elif operator == '-':
+    #     temp_number = float(current_number) - float(other_number)
+    #     clear()
+    #     current_number = str(temp_number)
+    #     update_entry()
+    # elif operator == '*':
+    #     temp_number = float(current_number) * float(other_number)
+    #     clear()
+    #     current_number = str(temp_number)
+    #     update_entry()
+    # elif operator == '/':
+    #     temp_number = float(current_number) / float(other_number)
+    #     current_number = str(temp_number)
+    #     update_entry()
 
 
 def clear():
